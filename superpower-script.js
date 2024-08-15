@@ -32,6 +32,8 @@ let SegmentifySuperPowers = {
     waitForDependencies: function () {
         let self = SegmentifySuperPowers;
 
+        if (document.location.href !== 'https://v3.segmentify.com/admin/accounts') return false;
+
         if (document.body) {
             self.segmentifyAccountsInputFocus();
         } else {
