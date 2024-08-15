@@ -1,4 +1,8 @@
 let SegmentifySuperPowers = {
+    config: {
+        waitCount: 50
+    },
+    
     segmentifyAccountsInputFocus: function () {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
