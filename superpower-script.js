@@ -49,6 +49,8 @@ let SegmentifySuperPowers = {
 
         if (!self.config.urls.includes(document.location.href)) return;
 
+        this.interceptAjax();
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 self.segmentifyAccountsInputFocus();
@@ -67,14 +69,15 @@ let SegmentifySuperPowers = {
         const originalFetch = window.fetch;
         window.fetch = async (...args) => {
             const response = await originalFetch(...args);
-            if (args[0].includes(this.config.ajaxWatchUrl)) {
+    
+            if (typeof args[0] === 'string' && args[0].includes(this.config.ajaxWatchUrl)) {
                 response.clone().json().then(() => {
                     this.segmentifyAccountsInputFocus();
                 });
             }
             return response;
         };
-
+    
         // Intercept XMLHttpRequest calls
         const originalXhrOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function (...args) {
@@ -85,11 +88,10 @@ let SegmentifySuperPowers = {
             });
             originalXhrOpen.apply(this, args);
         };
-    },
+    },    
 
     init: function () {
         this.waitForDependencies();
-        this.interceptAjax();
     }
 };
 
