@@ -14,12 +14,19 @@ let SegmentifySuperPowers = {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 const inputElement = document.querySelector('.page-options input');
+                const searchInputElement = document.querySelector('.SearchProductForm_form___4oBi input');
                 const ugElement = document.getElementById('__ug__client__styled__root__');
-                console.log(mutation);
 
                 if (inputElement && ugElement) {
                     setTimeout(() => {
                         inputElement.focus();
+                        observer.disconnect();
+                    }, 100);
+                }
+
+                if (searchInputElement && ugElement) {
+                    setTimeout(() => {
+                        searchInputElement.focus();
                         observer.disconnect();
                     }, 100);
                 }
