@@ -1,6 +1,13 @@
 let SegmentifySuperPowers = {
     config: {
-        waitCount: 0
+        waitCount: 0,
+        urls: [
+            'https://v3.segmentify.com/admin/accounts',
+            'https://v3.segmentify.com/admin/stats',
+            'https://v3.segmentify.com/recommendations/view-all',
+            'https://v3.segmentify.com/behavioural-targeting/engagement/view-all'
+        ],
+        ajaxWatchUrl: 'https://sauron.segmentify.com'
     },
 
     segmentifyAccountsInputFocus: function () {
@@ -8,6 +15,7 @@ let SegmentifySuperPowers = {
             mutations.forEach((mutation) => {
                 const inputElement = document.querySelector('.page-options input');
                 const ugElement = document.getElementById('__ug__client__styled__root__');
+                console.log(mutation);
 
                 if (inputElement && ugElement) {
                     setTimeout(() => {
@@ -18,34 +26,63 @@ let SegmentifySuperPowers = {
             });
         });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-
-        observer.observe(document.querySelector('#root'), {
-            childList: true,
-            subtree: true
+        const targets = [document.body, document.querySelector('#root'), document.querySelector('#wrapper')];
+        targets.forEach(target => {
+            if (target) {
+                observer.observe(target, {
+                    childList: true,
+                    subtree: true
+                });
+            }
         });
     },
 
     waitForDependencies: function () {
         let self = SegmentifySuperPowers;
 
-        if (document.location.href !== 'https://v3.segmentify.com/admin/accounts') return false;
+        if (!self.config.urls.includes(document.location.href)) return;
 
-        if (document.body) {
-            self.segmentifyAccountsInputFocus();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                self.segmentifyAccountsInputFocus();
+            });
         } else {
             self.config.waitCount++;
             if (self.config.waitCount < 75) {
                 setTimeout(function () { self.waitForDependencies(); }, 75);
+            } else {
+                self.segmentifyAccountsInputFocus();
             }
         }
     },
 
+    interceptAjax: function () {
+        const originalFetch = window.fetch;
+        window.fetch = async (...args) => {
+            const response = await originalFetch(...args);
+            if (args[0].includes(this.config.ajaxWatchUrl)) {
+                response.clone().json().then(() => {
+                    this.segmentifyAccountsInputFocus();
+                });
+            }
+            return response;
+        };
+
+        // Intercept XMLHttpRequest calls
+        const originalXhrOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (...args) {
+            this.addEventListener('load', () => {
+                if (this.responseURL.includes(SegmentifySuperPowers.config.ajaxWatchUrl)) {
+                    SegmentifySuperPowers.segmentifyAccountsInputFocus();
+                }
+            });
+            originalXhrOpen.apply(this, args);
+        };
+    },
+
     init: function () {
-        SegmentifySuperPowers.waitForDependencies();
+        this.waitForDependencies();
+        this.interceptAjax();
     }
 };
 
