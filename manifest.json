@@ -1,0 +1,40 @@
+{
+    "manifest_version": 3,
+    "name": "Segmentify SuperPower",
+    "version": "1.0",
+    "description": "Unleash the superpowers of Segmentify.",
+    "permissions": [
+        "scripting",
+        "storage",
+        "tabs",
+        "activeTab"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content-script.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Segmentify SuperPower"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "superpower-script.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}
